@@ -1,0 +1,385 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// KULLANICI YÖNETİMİ
+// ============================================
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  phone         String?      @unique
+  passwordHash  String?      // OAuth kullanıcılar için null olabilir
+  firstName     String
+  lastName      String
+  role          UserRole     @default(CUSTOMER)
+  status        UserStatus   @default(ACTIVE)
+  emailVerified DateTime?
+  phoneVerified DateTime?
+  
+  // OAuth fields
+  oauthProvider String?      // google, facebook, etc.
+  oauthId       String?
+  
+  // İlişkiler
+  reservations  Reservation[]
+  payments      Payment[]
+  reviews       Review[]
+  
+  // Metadata
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  lastLoginAt   DateTime?
+  
+  @@index([email])
+  @@index([phone])
+  @@map("users")
+}
+
+// ============================================
+// TUR YÖNETİMİ
+// ============================================
+
+enum TourStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model TourCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique // "Su Sporları", "Kara Sporları", etc.
+  nameEn      String   // İngilizce adı
+  slug        String   @unique
+  description String?
+  icon        String?  // Icon URL veya emoji
+  sortOrder   Int      @default(0)
+  tours       Tour[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("tour_categories")
+}
+
+model Tour {
+  id             String      @id @default(cuid())
+  categoryId     String
+  category       TourCategory @relation(fields: [categoryId], references: [id])
+  
+  // Temel bilgiler
+  title          String
+  titleEn        String
+  slug           String      @unique
+  description    String      @db.Text
+  descriptionEn  String      @db.Text
+  
+  // Fiyatlandırma
+  priceAdult     Decimal     @db.Decimal(10, 2)
+  priceChild     Decimal     @db.Decimal(10, 2)
+  priceInfant    Decimal?    @db.Decimal(10, 2)
+  currency       String      @default("TRY")
+  
+  // Süre ve kapasite
+  duration       Int         // Dakika cinsinden
+  maxCapacity    Int         // Günlük maksimum kişi sayısı
+  minParticipants Int        @default(1)
+  
+  // Özellikler (JSON)
+  features       Json        // ["Öğle yemeği dahil", "Fotoğraf çekimi", etc.]
+  included       Json        // Dahil olanlar
+  excluded       Json        // Dahil olmayanlar
+  whatToBring    Json?       // Yanınızda getirmeniz gerekenler
+  
+  // Medya
+  images         String[]    // Image URLs array
+  videoUrl       String?
+  
+  // Zaman yönetimi
+  availableDays  Int[]       // [0,1,2,3,4,5,6] (0=Pazar, 6=Cumartesi)
+  startTimes     String[]    // ["09:00", "14:00"] gibi
+  
+  // Durum
+  status         TourStatus  @default(ACTIVE)
+  isHighlighted  Boolean     @default(false)
+  sortOrder      Int         @default(0)
+  
+  // İlişkiler
+  reservations   Reservation[]
+  reviews        Review[]
+  availability   TourAvailability[]
+  
+  // Metadata
+  viewCount      Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  createdBy      String?     // Admin user ID
+  
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@map("tours")
+}
+
+// Günlük kapasite yönetimi
+model TourAvailability {
+  id              String   @id @default(cuid())
+  tourId          String
+  tour            Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  
+  date            DateTime @db.Date
+  timeSlot        String   // "09:00", "14:00" gibi
+  availableSpots  Int      // Kalan kapasite
+  totalSpots      Int      // Toplam kapasite (tour.maxCapacity'den kopyalanır)
+  
+  // Özel durumlar
+  isBlocked       Boolean  @default(false) // Admin tarafından manuel bloke
+  blockReason     String?
+  priceOverride   Decimal? @db.Decimal(10, 2) // Özel günlerde fiyat değişikliği
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([tourId, date, timeSlot])
+  @@index([tourId, date])
+  @@map("tour_availability")
+}
+
+// ============================================
+// REZERVASYON SİSTEMİ
+// ============================================
+
+enum ReservationStatus {
+  PENDING           // Ödeme bekliyor
+  CONFIRMED         // Ödeme alındı, onaylandı
+  CANCELLED         // İptal edildi
+  COMPLETED         // Tur tamamlandı
+  NO_SHOW           // Gelmedi
+  REFUNDED          // İade yapıldı
+}
+
+model Reservation {
+  id                String              @id @default(cuid())
+  reservationNumber String              @unique // ZEO-2024-001234 gibi
+  
+  // İlişkiler
+  userId            String?
+  user              User?               @relation(fields: [userId], references: [id])
+  tourId            String
+  tour              Tour                @relation(fields: [tourId], references: [id])
+  
+  // Tarih ve zaman
+  tourDate          DateTime            @db.Date
+  timeSlot          String
+  
+  // Katılımcı bilgileri
+  adultCount        Int
+  childCount        Int                 @default(0)
+  infantCount       Int                 @default(0)
+  totalParticipants Int
+  
+  // Fiyatlandırma
+  pricePerAdult     Decimal             @db.Decimal(10, 2)
+  pricePerChild     Decimal             @db.Decimal(10, 2)
+  pricePerInfant    Decimal             @db.Decimal(10, 2)
+  subtotal          Decimal             @db.Decimal(10, 2)
+  discountAmount    Decimal             @default(0) @db.Decimal(10, 2)
+  totalAmount       Decimal             @db.Decimal(10, 2)
+  currency          String              @default("TRY")
+  
+  // İletişim bilgileri (kullanıcı kayıtlı değilse)
+  guestEmail        String?
+  guestPhone        String?
+  guestFirstName    String?
+  guestLastName     String?
+  
+  // Özel talepler
+  specialRequests   String?             @db.Text
+  pickupLocation    String?             // Otel transferi için
+  
+  // Durum
+  status            ReservationStatus   @default(PENDING)
+  
+  // İlişkiler
+  payments          Payment[]
+  
+  // Villa entegrasyon bilgisi
+  villaReservationId String?            // Villa sisteminden gelen referans
+  referralSource     String?            // "villa", "direct", "social_media"
+  
+  // Metadata
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  confirmedAt       DateTime?
+  cancelledAt       DateTime?
+  cancellationReason String?
+  
+  @@index([userId])
+  @@index([tourId])
+  @@index([reservationNumber])
+  @@index([tourDate])
+  @@index([status])
+  @@map("reservations")
+}
+
+// ============================================
+// ÖDEME SİSTEMİ
+// ============================================
+
+enum PaymentMethod {
+  BANK_TRANSFER     // Havale/EFT
+  CREDIT_CARD       // Kredi kartı (sanal POS)
+  IYZICO           // İyzico entegrasyonu
+  PAYTR            // PayTR entegrasyonu
+  CASH             // Nakit (ofiste)
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  reservationId     String
+  reservation       Reservation   @relation(fields: [reservationId], references: [id])
+  userId            String?
+  user              User?         @relation(fields: [userId], references: [id])
+  
+  // Ödeme detayları
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("TRY")
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  
+  // Havale için
+  transferReference String?       // Dekont numarası
+  transferProof     String?       // Dekont görsel URL
+  
+  // Sanal POS için
+  transactionId     String?       // Banka işlem ID
+  cardLastFour      String?       // Son 4 hane
+  cardBrand         String?       // VISA, MASTERCARD
+  installment       Int           @default(1)
+  
+  // Gateway bilgileri
+  gatewayResponse   Json?         // İyzico/PayTR response
+  
+  // Metadata
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  refundAmount      Decimal?      @db.Decimal(10, 2)
+  refundReason      String?
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  @@index([reservationId])
+  @@index([userId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ============================================
+// DEĞERLENDIRME SİSTEMİ
+// ============================================
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id            String       @id @default(cuid())
+  tourId        String
+  tour          Tour         @relation(fields: [tourId], references: [id])
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  
+  rating        Int          // 1-5 yıldız
+  title         String?
+  comment       String       @db.Text
+  
+  status        ReviewStatus @default(PENDING)
+  
+  // Faydalılık
+  helpfulCount  Int          @default(0)
+  
+  // Admin moderasyonu
+  adminComment  String?
+  reviewedBy    String?      // Admin user ID
+  reviewedAt    DateTime?
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  @@index([tourId])
+  @@index([userId])
+  @@index([status])
+  @@map("reviews")
+}
+
+// ============================================
+// ENTEGRASYON SİSTEMİ (Villa)
+// ============================================
+
+model IntegrationToken {
+  id            String   @id @default(cuid())
+  name          String   // "Villa Kiralama Sitesi"
+  token         String   @unique // Güvenli random token
+  secret        String   // HMAC secret
+  
+  // İzinler
+  canCreateReservation Boolean @default(true)
+  canCheckAvailability Boolean @default(true)
+  
+  // Rate limiting
+  requestsPerHour Int    @default(1000)
+  
+  // Metadata
+  isActive      Boolean  @default(true)
+  lastUsedAt    DateTime?
+  createdAt     DateTime @default(now())
+  createdBy     String   // Admin user ID
+  
+  @@map("integration_tokens")
+}
+
+// ============================================
+// AYARLAR VE KONFİGÜRASYON
+// ============================================
+
+model SiteConfig {
+  key           String   @id
+  value         Json
+  description   String?
+  updatedAt     DateTime @updatedAt
+  updatedBy     String?  // Admin user ID
+  
+  @@map("site_config")
+}
