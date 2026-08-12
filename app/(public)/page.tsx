@@ -21,7 +21,8 @@ export default function Home() {
             Hemen Rezervasyon Yapın
           </h2>
           <p className="text-body-lg text-white/90 mb-8 max-w-2xl mx-auto">
-            Erken rezervasyon yaparak %10 indirim kazanın. Profesyonel rehberlik ve güvenli turlar için bugün yerinizi ayırtın.
+            Turları inceleyin, size uygun tarihi seçin. Havale ile güvenli rezervasyon
+            için ekibimiz aynı gün dönüş yapar.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a

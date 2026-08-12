@@ -4,22 +4,18 @@ import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react'
 export function Footer() {
   const navigation = {
     turlar: [
-      { name: 'Tekne Turları', href: '/turlar/tekne-turlari' },
-      { name: 'ATV Safari', href: '/turlar/atv-safari' },
-      { name: 'Yamaç Paraşütü', href: '/turlar/yamac-parasutu' },
-      { name: 'Dalış', href: '/turlar/dalis' },
+      { name: 'Tekne Turları', href: '/turlar?kategori=tekne-turlari' },
+      { name: 'ATV Safari', href: '/turlar?kategori=atv-safari' },
+      { name: 'Yamaç Paraşütü', href: '/turlar?kategori=yamac-parasutu' },
+      { name: 'Tüm Turlar', href: '/turlar' },
     ],
     kurumsal: [
       { name: 'Hakkımızda', href: '/hakkimizda' },
       { name: 'İletişim', href: '/iletisim' },
-      { name: 'SSS', href: '/sss' },
-      { name: 'Blog', href: '/blog' },
     ],
     destek: [
-      { name: 'Rezervasyon İptali', href: '/iptal-sartlari' },
-      { name: 'Ödeme Yöntemleri', href: '/odeme' },
-      { name: 'Gizlilik Politikası', href: '/gizlilik' },
-      { name: 'Kullanım Koşulları', href: '/kosullar' },
+      { name: 'Turlar', href: '/turlar' },
+      { name: 'İletişim', href: '/iletisim' },
     ],
   }
 
