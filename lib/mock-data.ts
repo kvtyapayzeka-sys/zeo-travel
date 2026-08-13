@@ -64,7 +64,7 @@ export const categories: Category[] = [
     description: 'Gökyüzünde özgürce uçun',
     icon: '🪂',
     tourCount: 8,
-    image: 'https://images.unsplash.com/photo-1540147644441-4c14a474f001?w=800&h=600&fit=crop'
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop'
   },
   {
     id: '4',
@@ -146,7 +146,7 @@ export const tours: Tour[] = [
     duration: 180, // 3 hours
     maxCapacity: 20,
     images: [
-      'https://images.unsplash.com/photo-1540147644441-4c14a474f001?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop',
       'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop',
     ],
     features: ['Profesyonel Pilot', 'Video Çekimi', 'Sigorta', 'Transfer'],

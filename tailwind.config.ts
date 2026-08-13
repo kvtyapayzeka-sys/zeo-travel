@@ -64,6 +64,12 @@ const config: Config = {
         'zeo-warning': '#f59e0b',
         'zeo-error': '#ef4444',
         'zeo-info': '#3b82f6',
+
+        // Kinetic Expedition brand palette
+        'zeo-ink': '#0a1420',
+        'zeo-coral': '#ff5a3d',
+        'zeo-lime': '#cbe85b',
+        'zeo-sand': '#f6f1e6',
         
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -119,9 +125,8 @@ const config: Config = {
         'caption': ['0.75rem', { lineHeight: '1.5', fontWeight: '500', letterSpacing: '0.02em' }],
       },
       fontFamily: {
-        'inter': ['var(--font-inter)', 'sans-serif'],
         'manrope': ['var(--font-manrope)', 'sans-serif'],
-        'space': ['var(--font-space-grotesk)', 'monospace'],
+        'bricolage': ['var(--font-bricolage)', 'sans-serif'],
       },
       backgroundImage: {
         'hero-gradient': 'linear-gradient(135deg, #0d86d9 0%, #0668b8 50%, #094f95 100%)',

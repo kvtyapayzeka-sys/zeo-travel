@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Phone, Mail } from 'lucide-react'
+import { Menu, X, Phone } from 'lucide-react'
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -16,14 +16,14 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zeo-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-zeo-ink text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="text-h3 font-bold text-zeo-primary-600">
-              Zeo <span className="text-zeo-accent-500">Travel</span>
-            </div>
+          <Link href="/" className="flex items-center">
+            <span className="font-bricolage text-xl font-extrabold uppercase tracking-tight">
+              Zeo<span className="text-zeo-coral">.</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -32,7 +32,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-body font-medium text-zeo-neutral-700 transition-colors hover:text-zeo-primary-600"
+                className="text-[13px] font-semibold uppercase tracking-[0.08em] text-white/60 transition-colors hover:text-white"
               >
                 {item.name}
               </Link>
@@ -40,15 +40,15 @@ export function Header() {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-5">
             <a
               href="tel:+905551234567"
-              className="flex items-center gap-2 text-body-sm text-zeo-neutral-600 hover:text-zeo-primary-600 transition-colors"
+              className="flex items-center gap-2 text-[13px] text-white/60 transition-colors hover:text-white"
             >
               <Phone className="h-4 w-4" />
               <span className="font-semibold">+90 555 123 4567</span>
             </a>
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href="/turlar">Turları Keşfet</Link>
             </Button>
           </div>
@@ -56,7 +56,7 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden rounded-lg p-2 text-zeo-neutral-700 hover:bg-zeo-neutral-100"
+            className="rounded-full p-2 text-white hover:bg-white/10 md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">Menüyü aç</span>
@@ -71,22 +71,22 @@ export function Header() {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-zeo-neutral-200 bg-white">
-          <div className="space-y-1 px-4 pb-3 pt-2">
+        <div className="border-t border-white/10 bg-zeo-ink md:hidden">
+          <div className="space-y-1 px-4 pb-4 pt-3">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="block rounded-lg px-3 py-2 text-body font-medium text-zeo-neutral-700 hover:bg-zeo-neutral-100"
+                className="block rounded-lg px-3 py-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-white/70 hover:bg-white/5 hover:text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-3 px-3">
               <a
                 href="tel:+905551234567"
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-body font-medium text-zeo-neutral-700 hover:bg-zeo-neutral-100"
+                className="flex items-center gap-2 text-[13px] font-medium text-white/70"
               >
                 <Phone className="h-4 w-4" />
                 <span>+90 555 123 4567</span>

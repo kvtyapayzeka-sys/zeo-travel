@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, Clock, Users } from 'lucide-react'
+import { Clock, Users } from 'lucide-react'
 import type { Tour } from '@/lib/mock-data'
 import { formatPrice } from '@/lib/utils'
 
@@ -14,63 +14,46 @@ export function TourCard({ tour }: TourCardProps) {
   const hours = Math.max(1, Math.floor(tour.duration / 60))
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl aspect-[4/5] bg-zeo-neutral-200">
-      <Image
-        src={tour.images[0]}
-        alt={tour.title}
-        fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+    <div className="group overflow-hidden border-2 border-zeo-ink bg-white transition-shadow duration-200 hover:shadow-[6px_6px_0_0_#0a1420]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <Image
+          src={tour.images[0]}
+          alt={tour.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <span className="absolute left-3 top-3 rounded-full bg-zeo-lime px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-zeo-ink">
+          {hours} sa
+        </span>
+        {tour.isHighlighted && (
+          <Badge variant="accent" className="absolute right-3 top-3">
+            Popüler
+          </Badge>
+        )}
+      </div>
 
-      {tour.isHighlighted && (
-        <Badge variant="accent" className="absolute top-4 right-4 z-10">
-          Popüler
-        </Badge>
-      )}
-
-      <div className="absolute bottom-4 left-4 right-4 z-10 bg-white rounded-2xl p-4 shadow-2xl transition-transform duration-300 group-hover:-translate-y-1">
-        <h3 className="text-h4 text-zeo-neutral-900 mb-2 line-clamp-2">
+      <div className="p-4">
+        <p className="text-[11px] uppercase tracking-[0.06em] text-zeo-ink/50">{tour.category.name}</p>
+        <h3 className="mt-1 line-clamp-2 text-[15px] font-bold leading-snug text-zeo-ink">
           {tour.title}
         </h3>
 
-        <div className="flex items-center gap-4 mb-3 text-body-sm text-zeo-neutral-600">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{hours} saat</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            <span>Max {tour.maxCapacity}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(tour.rating)
-                    ? 'fill-zeo-accent-500 text-zeo-accent-500'
-                    : 'text-zeo-neutral-300'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-body-sm font-semibold text-zeo-neutral-900">
-            {tour.rating}
+        <div className="mt-2 flex items-center gap-4 text-[12px] text-zeo-ink/60">
+          <span className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            {hours} saat
           </span>
-          <span className="text-body-sm text-zeo-neutral-600">
-            ({tour.reviewCount})
+          <span className="flex items-center gap-1">
+            <Users className="h-3.5 w-3.5" />
+            Maks {tour.maxCapacity}
           </span>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-zeo-ink/10 pt-4">
           <div>
-            <p className="text-caption text-zeo-neutral-500">Kişi başı</p>
-            <p className="text-h3 font-space font-bold text-zeo-primary-600">
+            <p className="text-[11px] text-zeo-ink/50">Kişi başı</p>
+            <p className="font-bricolage text-xl font-extrabold text-zeo-coral">
               {formatPrice(tour.priceAdult)}
             </p>
           </div>

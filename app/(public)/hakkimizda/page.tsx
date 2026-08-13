@@ -34,16 +34,16 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <div className="bg-white">
-      <section className="border-b border-zeo-neutral-100 bg-gradient-to-br from-zeo-neutral-50 via-white to-zeo-primary-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-16 lg:py-24">
-          <p className="text-caption uppercase tracking-[0.2em] text-zeo-primary-600 font-semibold mb-4">
+    <div className="bg-zeo-sand">
+      <section className="border-b-2 border-zeo-ink bg-zeo-ink text-white">
+        <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-12 lg:py-24">
+          <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.2em] text-zeo-coral">
             Zeo Travel
           </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-zeo-neutral-900 max-w-3xl leading-tight mb-6">
+          <h1 className="font-bricolage max-w-3xl text-4xl font-extrabold uppercase leading-[0.95] md:text-6xl">
             Antalya&apos;da turizmi sade ve güvenilir kılıyoruz
           </h1>
-          <p className="text-body-lg text-zeo-neutral-600 max-w-2xl">
+          <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-white/70">
             Zeo Travel, tekne turlarından yamaç paraşütüne kadar Antalya&apos;nın
             en çok tercih edilen aktivitelerini tek çatı altında sunar. Amacımız
             gösteriş değil: net bilgi, doğru fiyat ve sorunsuz deneyim.
@@ -53,10 +53,10 @@ export default function AboutPage() {
 
       <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div className="grid items-start gap-12 md:grid-cols-2 lg:gap-20">
             <div>
-              <h2 className="text-h1 font-bold text-zeo-neutral-900 mb-4">Hikâyemiz</h2>
-              <div className="space-y-4 text-body text-zeo-neutral-600">
+              <h2 className="font-bricolage mb-4 text-3xl font-extrabold uppercase text-zeo-ink">Hikâyemiz</h2>
+              <div className="space-y-4 text-[15px] leading-relaxed text-zeo-ink/70">
                 <p>
                   Yerel operasyon bilgisi ile dijital rezervasyonu birleştirdik.
                   Villa kiralama misafirlerimiz ve bireysel gezginler aynı
@@ -69,19 +69,17 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               {values.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-zeo-neutral-200 bg-zeo-neutral-50 p-5"
+                  className="border-2 border-zeo-ink bg-white p-5"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white mb-4 shadow-sm">
-                    <item.icon className="h-5 w-5 text-zeo-primary-600" />
-                  </div>
-                  <h3 className="text-h4 font-semibold text-zeo-neutral-900 mb-2">
+                  <item.icon className="mb-4 h-6 w-6 text-zeo-coral" />
+                  <h3 className="mb-2 text-[15px] font-bold text-zeo-ink">
                     {item.title}
                   </h3>
-                  <p className="text-body-sm text-zeo-neutral-600">{item.text}</p>
+                  <p className="text-[13px] text-zeo-ink/60">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -89,26 +87,21 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="py-14 bg-zeo-primary-600">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <section className="border-t-2 border-zeo-ink bg-zeo-ink py-14 text-white">
+        <div className="container mx-auto flex flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-12">
           <div>
-            <h2 className="text-h2 font-bold text-white mb-2">Turları keşfetmeye hazır mısınız?</h2>
-            <p className="text-body text-white/85">
+            <h2 className="font-bricolage text-2xl font-extrabold uppercase">Turları keşfetmeye hazır mısınız?</h2>
+            <p className="mt-2 text-[14px] text-white/70">
               Güncel program ve müsaitlik için tur listesine göz atın.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              className="bg-white text-zeo-primary-600 hover:bg-white/90 shadow-none"
-              asChild
-            >
+            <Button asChild>
               <Link href="/turlar">Turları Gör</Link>
             </Button>
             <Button
-              size="lg"
               variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              className="border-white/30 text-white hover:border-zeo-coral hover:text-zeo-coral"
               asChild
             >
               <Link href="/iletisim">İletişim</Link>

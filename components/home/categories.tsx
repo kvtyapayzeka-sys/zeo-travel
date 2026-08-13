@@ -1,62 +1,50 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getCategories } from '@/lib/mock-data'
-import { ArrowRight } from 'lucide-react'
+import { Reveal } from '@/components/kinetic/reveal'
+import { ScrollCarousel } from '@/components/kinetic/scroll-carousel'
 
 export function Categories() {
   const categories = getCategories()
 
   return (
-    <section className="py-16 lg:py-24 bg-gradient-to-b from-white to-zeo-neutral-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-        <div className="text-center mb-12">
-          <h2 className="text-h1 font-bold text-zeo-neutral-900 mb-4">
+    <section className="bg-zeo-ink py-20 text-white lg:py-28">
+      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+        <Reveal>
+          <h2 className="font-bricolage mb-10 text-4xl font-extrabold uppercase leading-none lg:text-6xl">
             Kategoriler
           </h2>
-          <p className="text-body-lg text-zeo-neutral-600 max-w-2xl mx-auto">
-            İlgi alanınıza göre size en uygun aktiviteyi bulun
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/turlar?kategori=${category.slug}`}
-              className="group relative overflow-hidden rounded-2xl aspect-square bg-zeo-neutral-200"
-            >
-              <Image
-                src={category.image}
-                alt={category.name}
-                fill
-                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10">
-                <div className="text-4xl mb-2" aria-hidden>
-                  {category.icon}
-                </div>
-                <h3 className="text-body font-semibold text-white mb-1">
-                  {category.name}
-                </h3>
-                <p className="text-caption text-white/80">
-                  {category.tourCount} tur
-                </p>
-
-                <div className="absolute bottom-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur">
-                    <ArrowRight className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute inset-0 rounded-2xl ring-2 ring-transparent group-hover:ring-zeo-primary-500 transition-all duration-300" />
-            </Link>
-          ))}
-        </div>
+        </Reveal>
       </div>
+      <ScrollCarousel
+        trackClassName="gap-4 px-6 lg:px-12"
+        arrowClassName="bg-zeo-ink/80 text-white hover:bg-zeo-coral"
+      >
+        {categories.map((cat) => (
+          <Link
+            key={cat.id}
+            href={`/turlar?kategori=${cat.slug}`}
+            className="group relative aspect-[3/4] w-[62vw] shrink-0 snap-start overflow-hidden sm:w-[38vw] lg:w-[22vw]"
+          >
+            <Image
+              src={cat.image}
+              alt={cat.name}
+              fill
+              sizes="(max-width: 1024px) 60vw, 22vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+            <div className="absolute inset-x-4 bottom-4">
+              <p className="font-bricolage -rotate-2 text-2xl font-extrabold uppercase leading-none text-white">
+                {cat.name}
+              </p>
+              <p className="mt-2 text-[11px] uppercase tracking-[0.08em] text-white/60">
+                {cat.tourCount} tur · geliştirme verisi
+              </p>
+            </div>
+          </Link>
+        ))}
+      </ScrollCarousel>
     </section>
   )
 }

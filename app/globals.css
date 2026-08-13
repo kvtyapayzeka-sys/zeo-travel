@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --background: 41 47% 93%;
+    --foreground: 213 52% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 213 52% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 201 93% 45%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 22 93% 53%;
-    --accent-foreground: 0 0% 100%;
+    --popover-foreground: 213 52% 8%;
+    --primary: 9 100% 62%;
+    --primary-foreground: 213 52% 8%;
+    --secondary: 41 20% 90%;
+    --secondary-foreground: 213 52% 8%;
+    --muted: 41 20% 90%;
+    --muted-foreground: 213 15% 40%;
+    --accent: 9 100% 62%;
+    --accent-foreground: 213 52% 8%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 201 93% 45%;
+    --border: 213 20% 85%;
+    --input: 213 20% 85%;
+    --ring: 9 100% 62%;
     --radius: 0.75rem;
   }
 }
@@ -35,7 +35,7 @@
     @apply bg-background text-foreground font-manrope;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-inter;
+    @apply font-bricolage;
   }
 }
 
@@ -109,4 +109,28 @@
   .animate-float {
     animation: none;
   }
+}
+
+/* Kinetic Expedition — marquee ticker */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee 26s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* Hide native scrollbar on arrow-driven horizontal carousels */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

@@ -1,46 +1,48 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { TourCard } from './tour-card'
+import { ArrowUpRight } from 'lucide-react'
 import { getHighlightedTours } from '@/lib/mock-data'
+import { Reveal } from '@/components/kinetic/reveal'
+import { FeaturedTourCard } from './featured-tour-card'
 
 export function FeaturedTours() {
-  const tours = getHighlightedTours()
+  const featured = getHighlightedTours()
 
   return (
-    <section className="py-16 lg:py-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-        {/* Section Header */}
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <h2 className="text-h1 font-bold text-zeo-neutral-900 mb-2">
-              Öne Çıkan Turlar
-            </h2>
-            <p className="text-body-lg text-zeo-neutral-600 max-w-2xl">
-              En çok tercih edilen ve müşterilerimizin favorisi turlarımızı keşfedin
-            </p>
-          </div>
-          <Button variant="outline" asChild className="hidden md:flex">
-            <Link href="/turlar">
-              Tümünü Gör →
-            </Link>
-          </Button>
+    <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12 lg:py-28">
+      <Reveal>
+        <p className="mb-2 text-[12px] font-bold uppercase tracking-[0.18em] text-zeo-coral">Öne Çıkanlar</p>
+        <div className="mb-14 flex items-end justify-between gap-4">
+          <h2 className="font-bricolage text-4xl font-extrabold uppercase leading-none text-zeo-ink lg:text-6xl">
+            Bu hafta sahada
+          </h2>
+          <Link
+            href="/turlar"
+            className="hidden shrink-0 items-center gap-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-zeo-ink hover:text-zeo-coral md:flex"
+          >
+            Tümü <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
+      </Reveal>
 
-        {/* Tours Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {tours.map((tour) => (
-            <TourCard key={tour.id} tour={tour} />
-          ))}
-        </div>
+      <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6 lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:pb-0">
+        {featured.map((tour, i) => (
+          <Reveal
+            key={tour.id}
+            delay={i * 0.06}
+            className="w-[78vw] shrink-0 snap-start sm:w-[45vw] lg:w-auto"
+          >
+            <FeaturedTourCard tour={tour} index={i} />
+          </Reveal>
+        ))}
+      </div>
 
-        {/* Mobile CTA */}
-        <div className="mt-8 text-center md:hidden">
-          <Button variant="outline" asChild className="w-full sm:w-auto">
-            <Link href="/turlar">
-              Tüm Turları Gör →
-            </Link>
-          </Button>
-        </div>
+      <div className="mt-8 text-center md:hidden">
+        <Link
+          href="/turlar"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold uppercase tracking-[0.08em] text-zeo-ink"
+        >
+          Tüm turları gör <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </section>
   )

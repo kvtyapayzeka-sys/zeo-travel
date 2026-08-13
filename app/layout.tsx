@@ -1,22 +1,16 @@
 import type { Metadata } from 'next'
-import { Inter, Manrope, Space_Grotesk } from 'next/font/google'
+import { Manrope, Bricolage_Grotesque } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
-
 const manrope = Manrope({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-manrope',
   display: 'swap',
 })
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-bricolage',
   display: 'swap',
 })
 
@@ -74,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="tr" className={`${inter.variable} ${manrope.variable} ${spaceGrotesk.variable}`}>
+    <html lang="tr" className={`${manrope.variable} ${bricolage.variable}`}>
       <body className="antialiased">
         {children}
       </body>
