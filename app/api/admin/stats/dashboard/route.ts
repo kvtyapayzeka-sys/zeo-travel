@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { ApiResponse } from '@/types/api.types'
 import { startOfDay, startOfMonth, endOfMonth, subMonths } from 'date-fns'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)

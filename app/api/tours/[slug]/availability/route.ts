@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ApiResponse } from '@/types/api.types'
-import { addDays, format, startOfDay } from 'date-fns'
+import { addDays, format } from 'date-fns'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(
   request: NextRequest,
@@ -14,8 +16,8 @@ export async function GET(
     const daysParam = searchParams.get('days') || '30'
 
     // Find tour
-    const tour = await prisma.tour.findUnique({
-      where: { slug },
+    const tour = await prisma.tour.findFirst({
+      where: { slug, status: 'ACTIVE' },
     })
 
     if (!tour) {
@@ -32,8 +34,29 @@ export async function GET(
     }
 
     // Date range
-    const startDate = dateParam ? new Date(dateParam) : startOfDay(new Date())
-    const days = Math.min(parseInt(daysParam), 90) // Max 90 days
+    const parsedDays = Number.parseInt(daysParam, 10)
+    if (
+      !Number.isFinite(parsedDays) ||
+      parsedDays < 1 ||
+      (dateParam !== null && !/^\d{4}-\d{2}-\d{2}$/.test(dateParam))
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid date range',
+          },
+        },
+        { status: 400 }
+      )
+    }
+
+    const now = new Date()
+    const startDate = dateParam
+      ? new Date(`${dateParam}T00:00:00.000Z`)
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+    const days = Math.min(parsedDays, 90) // Max 90 days
     const endDate = addDays(startDate, days)
 
     // Get availability
@@ -53,7 +76,16 @@ export async function GET(
     })
 
     // Group by date
-    const availabilityByDate: Record<string, any[]> = {}
+    const availabilityByDate: Record<
+      string,
+      Array<{
+        time: string
+        availableSpots: number
+        totalSpots: number
+        isAvailable: boolean
+        priceOverride?: number
+      }>
+    > = {}
 
     availability.forEach((slot) => {
       const dateStr = format(slot.date, 'yyyy-MM-dd')

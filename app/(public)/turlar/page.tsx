@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { TourCard } from '@/components/home/tour-card'
-import { getTours, getCategories } from '@/lib/mock-data'
 import { formatPrice } from '@/lib/utils'
 import { Grid3x3, List, SlidersHorizontal, X } from 'lucide-react'
+import type { PublicCategory, PublicTour } from '@/types/public.types'
 
 interface FilterPanelProps {
-  categories: ReturnType<typeof getCategories>
+  categories: PublicCategory[]
   totalCount: number
   selectedCategory: string
   setSelectedCategory: (v: string) => void
@@ -118,9 +118,84 @@ export default function ToursPage() {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000])
   const [sortBy, setSortBy] = useState<string>('popular')
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [tours, setTours] = useState<PublicTour[]>([])
+  const [categories, setCategories] = useState<PublicCategory[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
-  const tours = getTours()
-  const categories = getCategories()
+  useEffect(() => {
+    const category = new URLSearchParams(window.location.search).get('kategori')
+    if (category) {
+      setSelectedCategory(category)
+    }
+
+    let cancelled = false
+
+    async function loadData() {
+      try {
+        const [toursResponse, categoriesResponse] = await Promise.all([
+          fetch('/api/tours?limit=100'),
+          fetch('/api/categories'),
+        ])
+
+        if (!toursResponse.ok || !categoriesResponse.ok) {
+          throw new Error('Tur verileri yüklenemedi')
+        }
+
+        const [toursPayload, categoriesPayload] = await Promise.all([
+          toursResponse.json(),
+          categoriesResponse.json(),
+        ])
+
+        if (!toursPayload.success || !categoriesPayload.success) {
+          throw new Error('Tur verileri yüklenemedi')
+        }
+
+        const normalizedTours: PublicTour[] = toursPayload.data.map((tour: any) => ({
+          ...tour,
+          priceAdult: Number(tour.priceAdult),
+          priceChild: Number(tour.priceChild),
+          priceInfant: Number(tour.priceInfant ?? 0),
+          features: Array.isArray(tour.features) ? tour.features : [],
+          included: Array.isArray(tour.included) ? tour.included : [],
+          excluded: Array.isArray(tour.excluded) ? tour.excluded : [],
+          whatToBring: Array.isArray(tour.whatToBring) ? tour.whatToBring : [],
+          rating: tour.rating !== null && Number(tour.rating) > 0 ? Number(tour.rating) : null,
+          reviewCount: Number(tour.reviewCount ?? 0),
+          updatedAt: String(tour.updatedAt),
+        }))
+        const normalizedCategories: PublicCategory[] = categoriesPayload.data.map(
+          (category: any) => ({
+            ...category,
+            description: category.description ?? '',
+            icon: category.icon ?? null,
+            tourCount: Number(category.tourCount ?? 0),
+            image: null,
+            updatedAt: String(category.updatedAt),
+          })
+        )
+
+        if (!cancelled) {
+          setTours(normalizedTours)
+          setCategories(normalizedCategories)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : 'Tur verileri yüklenemedi')
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadData()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const filteredTours = tours
     .filter((tour) => {
@@ -218,7 +293,19 @@ export default function ToursPage() {
             </div>
 
             {/* Tours Grid/List */}
-            {viewMode === 'grid' ? (
+            {isLoading && (
+              <div className="border-2 border-dashed border-zeo-ink/20 py-16 text-center">
+                <p className="text-[15px] text-zeo-ink/60">Turlar yükleniyor…</p>
+              </div>
+            )}
+
+            {loadError && (
+              <div className="border-2 border-zeo-coral bg-white px-6 py-10 text-center">
+                <p className="text-[15px] text-zeo-ink">{loadError}</p>
+              </div>
+            )}
+
+            {!isLoading && !loadError && (viewMode === 'grid' ? (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {filteredTours.map((tour) => (
                   <TourCard key={tour.id} tour={tour} />
@@ -256,9 +343,9 @@ export default function ToursPage() {
                   </a>
                 ))}
               </div>
-            )}
+            ))}
 
-            {filteredTours.length === 0 && (
+            {!isLoading && !loadError && filteredTours.length === 0 && (
               <div className="border-2 border-dashed border-zeo-ink/20 py-16 text-center">
                 <p className="mb-4 text-[15px] text-zeo-ink/60">
                   Aradığınız kriterlere uygun tur bulunamadı

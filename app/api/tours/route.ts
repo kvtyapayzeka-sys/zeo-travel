@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { tourQuerySchema } from '@/lib/validation/tour.schema'
 import { ApiResponse } from '@/types/api.types'
+import type { Prisma } from '@prisma/client'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
     const validated = tourQuerySchema.parse(query)
 
     // Build where clause
-    const where: any = {
+    const where: Prisma.TourWhereInput = {
       status: validated.status || 'ACTIVE',
     }
 
@@ -41,9 +44,33 @@ export async function GET(request: NextRequest) {
     }
 
     if (validated.minPrice || validated.maxPrice) {
-      where.priceAdult = {}
-      if (validated.minPrice) where.priceAdult.gte = validated.minPrice
-      if (validated.maxPrice) where.priceAdult.lte = validated.maxPrice
+      where.priceAdult = {
+        ...(validated.minPrice ? { gte: validated.minPrice } : {}),
+        ...(validated.maxPrice ? { lte: validated.maxPrice } : {}),
+      }
+    }
+
+    if (validated.participants) {
+      where.maxCapacity = { gte: validated.participants }
+    }
+
+    if (validated.date) {
+      const requestedDate = new Date(validated.date)
+      const date = new Date(
+        Date.UTC(
+          requestedDate.getUTCFullYear(),
+          requestedDate.getUTCMonth(),
+          requestedDate.getUTCDate()
+        )
+      )
+
+      where.availability = {
+        some: {
+          date,
+          isBlocked: false,
+          availableSpots: { gte: validated.participants ?? 1 },
+        },
+      }
     }
 
     // Pagination
@@ -63,12 +90,6 @@ export async function GET(request: NextRequest) {
               slug: true,
             },
           },
-          _count: {
-            select: {
-              reviews: true,
-              reservations: true,
-            },
-          },
         },
         orderBy: [
           { isHighlighted: 'desc' },
@@ -81,26 +102,38 @@ export async function GET(request: NextRequest) {
       prisma.tour.count({ where }),
     ])
 
-    // Calculate average ratings
-    const toursWithRatings = await Promise.all(
-      tours.map(async (tour) => {
-        const avgRating = await prisma.review.aggregate({
+    const reviewStats = tours.length
+      ? await prisma.review.groupBy({
+          by: ['tourId'],
           where: {
-            tourId: tour.id,
+            tourId: { in: tours.map((tour) => tour.id) },
             status: 'APPROVED',
           },
-          _avg: {
-            rating: true,
-          },
+          _avg: { rating: true },
+          _count: { _all: true },
         })
-
-        return {
-          ...tour,
-          averageRating: avgRating._avg.rating || 0,
-          reviewCount: tour._count.reviews,
-        }
-      })
+      : []
+    const reviewsByTour = new Map(
+      reviewStats.map((review) => [
+        review.tourId,
+        {
+          rating: review._avg.rating,
+          count: review._count._all,
+        },
+      ])
     )
+    const toursWithRatings = tours.map((tour) => {
+      const reviews = reviewsByTour.get(tour.id)
+
+      return {
+        ...tour,
+        priceAdult: Number(tour.priceAdult),
+        priceChild: Number(tour.priceChild),
+        priceInfant: Number(tour.priceInfant ?? 0),
+        rating: reviews?.rating ?? null,
+        reviewCount: reviews?.count ?? 0,
+      }
+    })
 
     const response: ApiResponse = {
       success: true,

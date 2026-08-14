@@ -1,8 +1,8 @@
 /**
  * Email Service
  * 
- * Şu an için console.log kullanıyor.
- * İleride Resend veya SendGrid ile değiştirilecek.
+ * Provider seçilene kadar gönderim yapmaz.
+ * MailerSend veya Amazon SES adapter'ı daha sonra bağlanacak.
  */
 
 import { Reservation, Payment, User } from '@prisma/client'
@@ -22,24 +22,9 @@ type EmailTemplate =
   | 'payment-reminder'
   | 'review-request'
 
-// Mock email sender (Console log for now)
+// Disabled adapter: intentionally does not log PII or template payloads.
 async function sendEmail(options: EmailOptions): Promise<void> {
-  console.log('\n========== EMAIL ==========')
-  console.log('To:', options.to)
-  console.log('Subject:', options.subject)
-  console.log('Template:', options.template)
-  console.log('Data:', JSON.stringify(options.data, null, 2))
-  console.log('===========================\n')
-  
-  // TODO: Implement actual email sending with Resend/SendGrid
-  // Example:
-  // const resend = new Resend(process.env.RESEND_API_KEY)
-  // await resend.emails.send({
-  //   from: 'noreply@zeotravel.com',
-  //   to: options.to,
-  //   subject: options.subject,
-  //   html: renderTemplate(options.template, options.data),
-  // })
+  console.info(`[email:disabled] ${options.template}`)
 }
 
 /**
@@ -69,9 +54,6 @@ export async function sendReservationPendingEmail(
         iban: acc.iban,
         accountHolder: acc.accountHolder,
       })),
-      paymentDeadline: formatDate(
-        new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 gün
-      ),
     },
   })
 }

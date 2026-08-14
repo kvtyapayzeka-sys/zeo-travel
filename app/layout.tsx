@@ -19,32 +19,27 @@ export const metadata: Metadata = {
     default: 'Zeo Travel - Antalya Turları ve Aktiviteleri',
     template: '%s | Zeo Travel',
   },
-  description: 'Antalya\'nın en güvenilir turizm acentası. Tekne turları, yamaç paraşütü, ATV safari ve daha fazlası. Profesyonel rehberlik ve güvenli turlar.',
+  description: 'Antalya tekne turları, yamaç paraşütü, ATV safari ve rehberli aktiviteleri inceleyin.',
   keywords: ['antalya turları', 'tekne turu', 'yamaç paraşütü', 'atv safari', 'antalya aktiviteleri', 'tur rezervasyonu'],
   authors: [{ name: 'Zeo Travel' }],
   creator: 'Zeo Travel',
   publisher: 'Zeo Travel',
-  metadataBase: new URL('https://zeotravel.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zeotravel.com'),
   alternates: {
     canonical: '/',
-    languages: {
-      'tr-TR': '/tr',
-      'en-US': '/en',
-    },
   },
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
     url: 'https://zeotravel.com',
     title: 'Zeo Travel - Antalya Turları ve Aktiviteleri',
-    description: 'Antalya\'nın en güvenilir turizm acentası. Tekne turları, yamaç paraşütü, ATV safari ve daha fazlası.',
+    description: 'Antalya tekne turları, yamaç paraşütü, ATV safari ve rehberli aktiviteler.',
     siteName: 'Zeo Travel',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Zeo Travel - Antalya Turları',
-    description: 'Antalya\'nın en güvenilir turizm acentası. Profesyonel rehberlik ve güvenli turlar.',
-    creator: '@zeotravel',
+    description: 'Antalya turları ve rehberli aktiviteler.',
   },
   robots: {
     index: true,
@@ -56,9 +51,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  verification: {
-    google: 'google-site-verification-code',
   },
 }
 

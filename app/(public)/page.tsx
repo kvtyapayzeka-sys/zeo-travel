@@ -4,12 +4,14 @@ import { ArrowUpRight } from 'lucide-react'
 import { Hero, Ticker } from '@/components/home/hero'
 import { FeaturedTours } from '@/components/home/featured-tours'
 import { Categories } from '@/components/home/categories'
-import { getCategories } from '@/lib/mock-data'
 import { Reveal } from '@/components/kinetic/reveal'
+import { getPublicCategories, getPublicTours } from '@/lib/data/public'
+
+export const revalidate = 300
 
 export const metadata = {
   title: 'Zeo Travel - Antalya Turları ve Aktiviteleri',
-  description: 'Antalya\'nın en güvenilir turizm acentası. Tekne turları, yamaç paraşütü, ATV safari ve daha fazlası. Profesyonel rehberlik ve güvenli turlar.',
+  description: 'Antalya tekne turları, yamaç paraşütü, ATV safari ve rehberli aktiviteleri inceleyin.',
 }
 
 const coords = [
@@ -20,15 +22,19 @@ const coords = [
   { name: 'Kaş', lat: '36.20°N', lon: '29.64°E', image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=700&h=700&fit=crop&q=80' },
 ]
 
-export default function Home() {
-  const categories = getCategories()
+export default async function Home() {
+  const [tours, categories] = await Promise.all([
+    getPublicTours(),
+    getPublicCategories(),
+  ])
+  const featuredTours = tours.filter((tour) => tour.isHighlighted)
   const tickerItems = categories.map((c) => c.name)
 
   return (
     <>
-      <Hero />
-      <FeaturedTours />
-      <Categories />
+      <Hero tourCount={tours.length} categories={categories} />
+      <FeaturedTours tours={featuredTours} />
+      <Categories categories={categories} />
 
       {/* Destination coordinate tags */}
       <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12 lg:py-28">
@@ -57,9 +63,9 @@ export default function Home() {
         <div className="mx-auto flex max-w-[1400px] flex-wrap gap-3 px-6 py-10 lg:px-12">
           {[
             'Rehberli / profesyonel ekip',
-            'Ekipman dahil',
+            'Tur bazlı dahil olan hizmetler',
             'Havale ile güvenli ödeme',
-            'Rezervasyon sonrası e-posta onayı',
+            'Kayıtlı rezervasyon talebi',
           ].map((t) => (
             <span
               key={t}

@@ -1,22 +1,24 @@
 import { MetadataRoute } from 'next'
-import { getTours, getCategories } from '@/lib/mock-data'
+import { getPublicCategories, getPublicTours } from '@/lib/data/public'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://zeotravel.com'
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zeotravel.com'
   
-  const tours = getTours()
-  const categories = getCategories()
+  const [tours, categories] = await Promise.all([
+    getPublicTours(),
+    getPublicCategories(),
+  ])
 
   const tourUrls = tours.map((tour) => ({
     url: `${baseUrl}/turlar/${tour.slug}`,
-    lastModified: new Date(),
+    lastModified: new Date(tour.updatedAt),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }))
 
   const categoryUrls = categories.map((category) => ({
     url: `${baseUrl}/turlar?kategori=${category.slug}`,
-    lastModified: new Date(),
+    lastModified: new Date(category.updatedAt),
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }))

@@ -7,15 +7,30 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Starting database seed...')
 
+  const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase()
+  const adminPasswordValue = process.env.SEED_ADMIN_PASSWORD
+
+  if (!adminEmail) {
+    throw new Error('SEED_ADMIN_EMAIL must be set before running the seed')
+  }
+
+  if (!adminPasswordValue || adminPasswordValue.length < 12) {
+    throw new Error('SEED_ADMIN_PASSWORD must contain at least 12 characters')
+  }
+
   // 1. Create Super Admin User
   console.log('Creating super admin user...')
-  const adminPassword = await hash('Admin123!', 10)
+  const adminPassword = await hash(adminPasswordValue, 12)
   
   const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@zeotravel.com' },
-    update: {},
+    where: { email: adminEmail },
+    update: {
+      passwordHash: adminPassword,
+      role: 'SUPER_ADMIN',
+      status: 'ACTIVE',
+    },
     create: {
-      email: 'admin@zeotravel.com',
+      email: adminEmail,
       passwordHash: adminPassword,
       firstName: 'Admin',
       lastName: 'Zeo Travel',
@@ -67,7 +82,7 @@ async function main() {
     categories.map((cat) =>
       prisma.tourCategory.upsert({
         where: { slug: cat.slug },
-        update: {},
+        update: cat,
         create: cat,
       })
     )
@@ -216,8 +231,10 @@ async function main() {
 
   // 4. Create Tour Availability (next 30 days)
   console.log('\nCreating tour availability...')
-  const today = new Date()
-  
+  const now = new Date()
+  const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+  const availabilityEntries = []
+
   for (const tour of createdTours) {
     for (let i = 0; i < 30; i++) {
       const date = addDays(today, i)
@@ -226,21 +243,26 @@ async function main() {
       // Check if tour is available on this day
       if (tour.availableDays.includes(dayOfWeek)) {
         for (const timeSlot of tour.startTimes) {
-          await prisma.tourAvailability.create({
-            data: {
-              tourId: tour.id,
-              date,
-              timeSlot,
-              availableSpots: tour.maxCapacity,
-              totalSpots: tour.maxCapacity,
-              isBlocked: false,
-            },
+          availabilityEntries.push({
+            tourId: tour.id,
+            date,
+            timeSlot,
+            availableSpots: tour.maxCapacity,
+            totalSpots: tour.maxCapacity,
+            isBlocked: false,
           })
         }
       }
     }
   }
-  console.log('✓ Tour availability created for next 30 days')
+
+  const availabilityResult = await prisma.tourAvailability.createMany({
+    data: availabilityEntries,
+    skipDuplicates: true,
+  })
+  console.log(
+    `✓ Tour availability ready for next 30 days (${availabilityResult.count} new slots)`
+  )
 
   // 5. Create Site Config - Bank Accounts
   console.log('\nCreating site config...')
@@ -249,21 +271,8 @@ async function main() {
     update: {},
     create: {
       key: 'payment.bank_accounts',
-      value: [
-        {
-          bankName: 'Garanti BBVA',
-          iban: 'TR00 0000 0000 0000 0000 0000 00',
-          accountHolder: 'Zeo Travel Turizm Ltd. Şti.',
-          accountNumber: '1234567',
-        },
-        {
-          bankName: 'İş Bankası',
-          iban: 'TR11 1111 1111 1111 1111 1111 11',
-          accountHolder: 'Zeo Travel Turizm Ltd. Şti.',
-          accountNumber: '7654321',
-        },
-      ],
-      description: 'Havale/EFT için banka hesap bilgileri',
+      value: [],
+      description: 'Admin panelinden yönetilecek havale/EFT hesapları',
       updatedBy: superAdmin.id,
     },
   })
@@ -283,7 +292,7 @@ async function main() {
     update: {},
     create: {
       key: 'general.contact_email',
-      value: 'info@zeotravel.com',
+      value: adminEmail,
       description: 'İletişim email adresi',
     },
   })
@@ -291,8 +300,8 @@ async function main() {
 
   console.log('\n✅ Seed completed successfully!')
   console.log('\n📝 Login credentials:')
-  console.log('Email: admin@zeotravel.com')
-  console.log('Password: Admin123!')
+  console.log(`Email: ${adminEmail}`)
+  console.log('Password: SEED_ADMIN_PASSWORD environment variable')
 }
 
 main()

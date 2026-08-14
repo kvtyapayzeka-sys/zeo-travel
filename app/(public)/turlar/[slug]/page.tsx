@@ -1,18 +1,21 @@
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { BookingCard } from '@/components/tour/booking-card'
-import { getTourBySlug, getTours } from '@/lib/mock-data'
+import { getPublicTourBySlug, getPublicTours } from '@/lib/data/public'
 import { Clock, Users, Check, X } from 'lucide-react'
+import { TourSchema } from '@/components/seo/json-ld'
+
+export const revalidate = 300
 
 export async function generateStaticParams() {
-  const tours = getTours()
+  const tours = await getPublicTours()
   return tours.map((tour) => ({
     slug: tour.slug,
   }))
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const tour = getTourBySlug(params.slug)
+  const tour = await getPublicTourBySlug(params.slug)
 
   if (!tour) {
     return {
@@ -31,17 +34,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default function TourDetailPage({ params }: { params: { slug: string } }) {
-  const tour = getTourBySlug(params.slug)
+export default async function TourDetailPage({ params }: { params: { slug: string } }) {
+  const tour = await getPublicTourBySlug(params.slug)
 
   if (!tour) {
     notFound()
   }
 
   const hours = Math.floor(tour.duration / 60)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zeotravel.com'
 
   return (
-    <div className="bg-zeo-sand pb-28 pt-12 lg:pb-12">
+    <>
+      <TourSchema tour={tour} url={`${baseUrl}/turlar/${tour.slug}`} />
+      <div className="bg-zeo-sand pb-28 pt-12 lg:pb-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         {/* Gallery */}
         <div className="mb-8">
@@ -171,6 +177,7 @@ export default function TourDetailPage({ params }: { params: { slug: string } })
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

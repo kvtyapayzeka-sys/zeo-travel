@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { ApiResponse } from '@/types/api.types'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { number: string } }
@@ -59,7 +61,9 @@ export async function GET(
     }
 
     // Verify email matches
-    if (reservation.guestEmail !== email) {
+    if (
+      reservation.guestEmail?.toLowerCase() !== email.trim().toLowerCase()
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -72,16 +76,37 @@ export async function GET(
       )
     }
 
+    const bankConfig =
+      reservation.status === 'PENDING'
+        ? await prisma.siteConfig.findUnique({
+            where: { key: 'payment.bank_accounts' },
+          })
+        : null
+    const bankAccounts = Array.isArray(bankConfig?.value)
+      ? bankConfig.value
+      : []
+
     const response: ApiResponse = {
       success: true,
       data: {
         ...reservation,
+        payments: reservation.payments.map((payment) => ({
+          ...payment,
+          amount: Number(payment.amount),
+          refundAmount:
+            payment.refundAmount === null ? null : Number(payment.refundAmount),
+        })),
         totalAmount: Number(reservation.totalAmount),
         pricePerAdult: Number(reservation.pricePerAdult),
         pricePerChild: Number(reservation.pricePerChild),
         pricePerInfant: Number(reservation.pricePerInfant),
         subtotal: Number(reservation.subtotal),
         discountAmount: Number(reservation.discountAmount),
+        paymentInstructions: {
+          method: 'BANK_TRANSFER',
+          bankAccounts,
+          reference: reservation.reservationNumber,
+        },
       },
     }
 

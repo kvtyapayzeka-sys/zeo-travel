@@ -3,6 +3,9 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { prisma } from './prisma'
 import { UserRole } from '@prisma/client'
+import { getServerEnv } from './env'
+
+const env = getServerEnv()
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -79,7 +82,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
 }
 
 /**

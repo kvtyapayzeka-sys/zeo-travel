@@ -1,4 +1,4 @@
-import type { Tour } from '@/lib/mock-data'
+import type { PublicTour } from '@/types/public.types'
 
 interface OrganizationSchemaProps {
   name: string
@@ -21,18 +21,6 @@ export function OrganizationSchema({ name, url, logo, description }: Organizatio
       addressRegion: 'Antalya',
       addressLocality: 'Antalya',
     },
-    contactPoint: {
-      '@type': 'ContactPoint',
-      telephone: '+90-555-123-4567',
-      contactType: 'Customer Service',
-      areaServed: 'TR',
-      availableLanguage: ['Turkish', 'English'],
-    },
-    sameAs: [
-      'https://facebook.com/zeotravel',
-      'https://instagram.com/zeotravel',
-      'https://twitter.com/zeotravel',
-    ],
   }
 
   return (
@@ -44,7 +32,7 @@ export function OrganizationSchema({ name, url, logo, description }: Organizatio
 }
 
 interface TourSchemaProps {
-  tour: Tour
+  tour: PublicTour
   url: string
 }
 
@@ -62,13 +50,17 @@ export function TourSchema({ tour, url }: TourSchemaProps) {
       priceCurrency: tour.currency,
       availability: 'https://schema.org/InStock',
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: tour.rating,
-      reviewCount: tour.reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    },
+    ...(tour.rating !== null && tour.reviewCount > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: tour.rating,
+            reviewCount: tour.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
     touristType: 'https://schema.org/Adult',
     itinerary: {
       '@type': 'ItemList',

@@ -3,11 +3,11 @@ import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Clock, Users } from 'lucide-react'
-import type { Tour } from '@/lib/mock-data'
+import type { PublicTour } from '@/types/public.types'
 import { formatPrice } from '@/lib/utils'
 
 interface TourCardProps {
-  tour: Tour
+  tour: PublicTour
 }
 
 export function TourCard({ tour }: TourCardProps) {

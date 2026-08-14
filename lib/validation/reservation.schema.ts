@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const createReservationSchema = z.object({
   tourId: z.string().cuid('Invalid tour ID'),
-  tourDate: z.string().datetime('Invalid date format'),
+  tourDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
   timeSlot: z.string().regex(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
   
   adultCount: z.number().int().min(1, 'At least 1 adult is required').max(50),
@@ -22,9 +22,12 @@ export const createReservationSchema = z.object({
   villaReservationId: z.string().optional(),
 }).refine(
   (data) => {
-    const date = new Date(data.tourDate)
+    const date = new Date(`${data.tourDate}T00:00:00.000Z`)
     const now = new Date()
-    return date > now
+    const today = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    )
+    return date > today
   },
   {
     message: 'Tour date must be in the future',

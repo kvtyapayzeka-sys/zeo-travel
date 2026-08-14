@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Tour } from '@/lib/mock-data'
+import type { PublicTour } from '@/types/public.types'
 import { formatPrice } from '@/lib/utils'
 
 const rotations = ['lg:-rotate-2', 'lg:rotate-1', 'lg:-rotate-1', 'lg:rotate-2']
 
 interface FeaturedTourCardProps {
-  tour: Tour
+  tour: PublicTour
   index: number
 }
 

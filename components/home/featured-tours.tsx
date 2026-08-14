@@ -1,12 +1,10 @@
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
-import { getHighlightedTours } from '@/lib/mock-data'
 import { Reveal } from '@/components/kinetic/reveal'
 import { FeaturedTourCard } from './featured-tour-card'
+import type { PublicTour } from '@/types/public.types'
 
-export function FeaturedTours() {
-  const featured = getHighlightedTours()
-
+export function FeaturedTours({ tours }: { tours: PublicTour[] }) {
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12 lg:py-28">
       <Reveal>
@@ -25,7 +23,7 @@ export function FeaturedTours() {
       </Reveal>
 
       <div className="flex snap-x snap-mandatory gap-6 overflow-x-auto pb-6 lg:grid lg:grid-cols-4 lg:gap-8 lg:overflow-visible lg:pb-0">
-        {featured.map((tour, i) => (
+        {tours.map((tour, i) => (
           <Reveal
             key={tour.id}
             delay={i * 0.06}

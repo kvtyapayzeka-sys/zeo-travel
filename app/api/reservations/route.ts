@@ -8,6 +8,8 @@ import {
 } from '@/lib/utils'
 import { sendReservationPendingEmail } from '@/lib/email'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -34,11 +36,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check availability
+    const tourDate = new Date(`${validated.tourDate}T00:00:00.000Z`)
     const availability = await prisma.tourAvailability.findUnique({
       where: {
         tourId_date_timeSlot: {
           tourId: validated.tourId,
-          date: new Date(validated.tourDate),
+          date: tourDate,
           timeSlot: validated.timeSlot,
         },
       },
@@ -89,12 +92,29 @@ export async function POST(request: NextRequest) {
 
     // Create reservation in transaction
     const result = await prisma.$transaction(async (tx) => {
+      const capacityUpdate = await tx.tourAvailability.updateMany({
+        where: {
+          id: availability.id,
+          isBlocked: false,
+          availableSpots: { gte: totalParticipants },
+        },
+        data: {
+          availableSpots: {
+            decrement: totalParticipants,
+          },
+        },
+      })
+
+      if (capacityUpdate.count !== 1) {
+        throw new Error('CAPACITY_CHANGED')
+      }
+
       // Create reservation
       const reservation = await tx.reservation.create({
         data: {
           reservationNumber: generateReservationNumber(),
           tourId: validated.tourId,
-          tourDate: new Date(validated.tourDate),
+          tourDate,
           timeSlot: validated.timeSlot,
           adultCount: validated.adultCount,
           childCount: validated.childCount,
@@ -136,18 +156,6 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Update availability
-      await tx.tourAvailability.update({
-        where: {
-          id: availability.id,
-        },
-        data: {
-          availableSpots: {
-            decrement: totalParticipants,
-          },
-        },
-      })
-
       return reservation
     })
 
@@ -173,7 +181,6 @@ export async function POST(request: NextRequest) {
           method: 'BANK_TRANSFER',
           bankAccounts,
           reference: result.reservationNumber,
-          deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
         },
       },
     }
@@ -193,6 +200,19 @@ export async function POST(request: NextRequest) {
           },
         },
         { status: 400 }
+      )
+    }
+
+    if (error instanceof Error && error.message === 'CAPACITY_CHANGED') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INSUFFICIENT_CAPACITY',
+            message: 'Selected capacity is no longer available',
+          },
+        },
+        { status: 409 }
       )
     }
 

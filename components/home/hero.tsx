@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { getCategories, getTours } from '@/lib/mock-data'
 import { HeroSlideshow } from '@/components/kinetic/hero-slideshow'
 import { Reveal } from '@/components/kinetic/reveal'
+import type { PublicCategory } from '@/types/public.types'
 
 const heroImages = [
   { src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800&h=1200&fit=crop&q=80', alt: 'Yükseklerden Akdeniz manzarası' },
@@ -25,9 +25,12 @@ export function Ticker({ items }: { items: string[] }) {
   )
 }
 
-export function Hero() {
-  const tours = getTours()
-  const categories = getCategories()
+interface HeroProps {
+  tourCount: number
+  categories: PublicCategory[]
+}
+
+export function Hero({ tourCount, categories }: HeroProps) {
   const tickerItems = categories.map((c) => c.name)
 
   return (
@@ -56,7 +59,7 @@ export function Hero() {
                 aktiviteleri tek noktada. Etiketle, seç, ayır.
               </p>
               <span className="mt-3 inline-block rounded-full bg-zeo-lime px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-zeo-ink">
-                {tours.length} aktif tur
+                {tourCount} aktif tur
               </span>
             </Reveal>
           </div>
