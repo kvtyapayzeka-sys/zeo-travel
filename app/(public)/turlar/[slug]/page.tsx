@@ -4,6 +4,7 @@ import { BookingCard } from '@/components/tour/booking-card'
 import { getPublicTourBySlug, getPublicTours } from '@/lib/data/public'
 import { Clock, Users, Check, X } from 'lucide-react'
 import { TourSchema } from '@/components/seo/json-ld'
+import { PhotoGallery } from '@/components/tour/photo-gallery'
 
 export const revalidate = 300
 
@@ -51,40 +52,7 @@ export default async function TourDetailPage({ params }: { params: { slug: strin
       <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         {/* Gallery */}
         <div className="mb-8">
-          <div className="grid grid-cols-4 gap-3">
-            <div className="col-span-4 aspect-[16/9] overflow-hidden border-2 border-zeo-ink md:col-span-3">
-              <img
-                src={tour.images[0]}
-                alt={tour.title}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="hidden md:col-span-1 md:grid md:gap-3">
-              {tour.images.slice(1, 3).map((image, i) => (
-                <div key={i} className="aspect-square overflow-hidden border-2 border-zeo-ink">
-                  <img
-                    src={image}
-                    alt={`${tour.title} ${i + 2}`}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
-              {tour.images.length > 3 && (
-                <button className="group relative aspect-square overflow-hidden border-2 border-zeo-ink">
-                  <img
-                    src={tour.images[3] || tour.images[0]}
-                    alt="Diğer fotoğraflar"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-zeo-ink/70">
-                    <span className="text-[13px] font-bold uppercase tracking-[0.04em] text-white">
-                      +{tour.images.length - 3} Fotoğraf
-                    </span>
-                  </div>
-                </button>
-              )}
-            </div>
-          </div>
+          <PhotoGallery images={tour.images} title={tour.title} />
         </div>
 
         <div className="lg:grid lg:grid-cols-3 lg:gap-8">
