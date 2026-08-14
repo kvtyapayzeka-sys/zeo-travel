@@ -45,6 +45,33 @@ export async function PATCH(
   } catch (error: any) {
     console.error('PATCH /api/admin/tours/[id] error:', error)
 
+    if (error.name === 'ZodError') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid tour data',
+            details: error.errors,
+          },
+        },
+        { status: 400 }
+      )
+    }
+
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'TOUR_ALREADY_EXISTS',
+            message: 'A tour with this slug already exists',
+          },
+        },
+        { status: 409 }
+      )
+    }
+
     if (error.code === 'P2025') {
       return NextResponse.json(
         {

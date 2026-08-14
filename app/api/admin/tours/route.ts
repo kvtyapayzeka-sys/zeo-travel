@@ -61,6 +61,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'TOUR_ALREADY_EXISTS',
+            message: 'A tour with this slug already exists',
+          },
+        },
+        { status: 409 }
+      )
+    }
+
     return NextResponse.json(
       {
         success: false,

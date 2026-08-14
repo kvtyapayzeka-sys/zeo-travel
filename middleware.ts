@@ -9,6 +9,19 @@ export default withAuth(
     // Admin routes - require ADMIN or SUPER_ADMIN role
     if (path.startsWith('/admin') || path.startsWith('/api/admin')) {
       if (!token || (token.role !== 'ADMIN' && token.role !== 'SUPER_ADMIN')) {
+        if (path.startsWith('/api/admin')) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: 'UNAUTHORIZED',
+                message: 'Admin access required',
+              },
+            },
+            { status: 401 }
+          )
+        }
+
         return NextResponse.redirect(new URL('/auth/signin?error=unauthorized', req.url))
       }
     }
@@ -24,7 +37,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: () => true,
     },
   }
 )

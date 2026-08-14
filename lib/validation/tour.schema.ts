@@ -9,8 +9,8 @@ export const createTourSchema = z.object({
   descriptionEn: z.string().min(50, 'English description must be at least 50 characters'),
   
   priceAdult: z.number().positive('Adult price must be positive'),
-  priceChild: z.number().positive('Child price must be positive'),
-  priceInfant: z.number().positive('Infant price must be positive').optional(),
+  priceChild: z.number().nonnegative('Child price cannot be negative'),
+  priceInfant: z.number().nonnegative('Infant price cannot be negative').optional(),
   currency: z.string().default('TRY'),
   
   duration: z.number().int().positive('Duration must be positive (in minutes)'),

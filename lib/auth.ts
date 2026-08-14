@@ -20,8 +20,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password are required')
         }
 
+        const email = credentials.email.trim().toLowerCase()
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         })
 
         if (!user || !user.passwordHash) {
@@ -61,7 +62,7 @@ export const authOptions: NextAuthOptions = {
   
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    error: '/auth/signin',
   },
   
   callbacks: {
